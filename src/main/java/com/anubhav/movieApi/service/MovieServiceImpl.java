@@ -2,6 +2,7 @@ package com.anubhav.movieApi.service;
 
 import com.anubhav.movieApi.dto.MovieDto;
 import com.anubhav.movieApi.entities.Movie;
+import com.anubhav.movieApi.exception.MovieNotFoundException;
 import com.anubhav.movieApi.repository.MovieRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,7 +52,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDto getMovie(Integer movieId) {
         Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new RuntimeException("Movie ID doesn't exist"));
+                .orElseThrow(() -> new MovieNotFoundException("Movie ID doesn't exist"));
         String posterUrl = generatePosterUrl(movie.getPoster());
         return toMovieDto(movie, posterUrl);
     }
@@ -67,7 +68,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDto updateMovie(Integer movieId, MovieDto movieDto, MultipartFile multipartFile) throws IOException {
         Movie existingMovie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new RuntimeException("Movie doesn't exist with the ID: " + movieId));
+                .orElseThrow(() -> new MovieNotFoundException("Movie doesn't exist with the ID: " + movieId));
 
         if (multipartFile != null && !multipartFile.isEmpty()) {
             String oldPoster = existingMovie.getPoster();
@@ -88,7 +89,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public String deleteMovie(Integer movieId) throws IOException {
         Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new RuntimeException("Movie with ID: " + movieId + " does not exist."));
+                .orElseThrow(() -> new MovieNotFoundException("Movie with ID: " + movieId + " does not exist."));
 
         String oldPoster = movie.getPoster();
         Files.deleteIfExists(Paths.get(path + File.separator + oldPoster));
